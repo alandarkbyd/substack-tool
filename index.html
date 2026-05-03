@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Substack Viral Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:       #0c0c0f;
+    --surface:  #131318;
+    --card:     #1a1a22;
+    --cardHov:  #1f1f2a;
+    --border:   #2a2a38;
+    --borderHi: #3d3d55;
+    --accent:   #e8622a;
+    --accentDim:#7a2e10;
+    --green:    #2ecc71;
+    --greenDim: #1a5c38;
+    --purple:   #a78bfa;
+    --purpleDim:#3b1f7a;
+    --text:     #e8e8f0;
+    --textSub:  #8888a8;
+    --textMut:  #555568;
+    --mono:     'DM Mono', monospace;
+    --serif:    'Playfair Display', serif;
+    --sans:     'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  header {
+    background: rgba(12,12,15,0.92);
+    backdrop-filter: blur(14px);
+    padding: 16px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo { font-family: var(--serif); font-size: 21px; font-weight: 900; color: var(--text); letter-spacing: -0.5px; }
+  .logo span { color: var(--accent); }
+  .header-right { display: flex; align-items: center; gap: 14px; }
+  .header-tag { font-family: var(--mono); font-size: 10px; color: var(--textMut); letter-spacing: 1.5px; text-transform: uppercase; }
+  .dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    padding: 72px 40px 60px;
+    text-align: center;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(232,98,42,0.13) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 40% at 20% 100%, rgba(167,139,250,0.07) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image: linear-gradient(var(--border) 1px, transparent 1px),
+                      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    opacity: 0.18;
+    pointer-events: none;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 80%);
+  }
+  .hero h1 {
+    position: relative;
+    font-family: var(--serif);
+    font-size: clamp(34px, 6vw, 66px);
+    font-weight: 900;
+    line-height: 1.08;
+    margin-bottom: 18px;
+    letter-spacing: -1px;
+  }
+  .hero h1 em { color: var(--accent); font-style: italic; }
+  .hero p { position: relative; font-size: 16px; color: var(--textSub); max-width: 520px; margin: 0 auto 28px; line-height: 1.75; }
+  .hero-pills { position: relative; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .hero-pill {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+    padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); color: var(--textSub);
+  }
+
+  /* MAIN */
+  .main { max-width: 1220px; margin: 0 auto; padding: 48px 24px 100px; }
+
+  /* SECTION HEADER */
+  .sec-head { margin-bottom: 20px; }
+  .sec-title { font-family: var(--serif); font-size: 24px; font-weight: 700; display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .chip {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 4px; border: 1px solid;
+  }
+  .chip-o { color: var(--accent); border-color: var(--accentDim); background: rgba(232,98,42,.08); }
+  .chip-g  { color: var(--green);  border-color: var(--greenDim);  background: rgba(46,204,113,.08); }
+  .chip-p  { color: var(--purple); border-color: var(--purpleDim); background: rgba(167,139,250,.08); }
+  .chip-live {
+    color: var(--green); border-color: var(--greenDim); background: rgba(46,204,113,.08);
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .chip-live::before { content:''; width:5px;height:5px;background:var(--green);border-radius:50%;animation:pulse 1.5s infinite; }
+  .sec-sub { font-size: 13px; color: var(--textSub); }
+
+  /* SKELETON */
+  .skeleton {
+    background: linear-gradient(90deg, var(--card) 25%, var(--cardHov) 50%, var(--card) 75%);
+    background-size: 200% 100%;
+    animation: skel 1.4s infinite;
+    border-radius: 6px;
+  }
+  @keyframes skel { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  .skel-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+
+  /* TRENDING */
+  .block { margin-bottom: 56px; }
+  .trend-search { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .trend-input {
+    flex: 1; min-width: 220px;
+    background: var(--card); border: 1px solid var(--border); border-radius: 9px;
+    padding: 11px 14px; color: var(--text); font-family: var(--sans); font-size: 14px; outline: none;
+    transition: border-color .2s;
+  }
+  .trend-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(232,98,42,.1); }
+  .trend-fetch-btn {
+    background: var(--accent); color: #fff; border: none; padding: 11px 22px;
+    border-radius: 9px; font-family: var(--sans); font-weight: 600; font-size: 14px;
+    cursor: pointer; white-space: nowrap; transition: all .2s;
+  }
+  .trend-fetch-btn:hover { background: #c94f20; }
+  .trend-fetch-btn:disabled { background: #333; color: #555; cursor: not-allowed; }
+
+  .trending-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 14px; }
+  .trend-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 20px; cursor: pointer; transition: all 0.18s; position: relative; overflow: hidden;
+  }
+  .trend-card::after {
+    content:''; position:absolute; top:0;left:0; width:3px;height:100%;
+    background:var(--accent); transform:scaleY(0); transition:transform .18s; transform-origin:bottom; border-radius:3px 0 0 3px;
+  }
+  .trend-card:hover { background:var(--cardHov); border-color:var(--borderHi); transform:translateY(-2px); }
+  .trend-card:hover::after, .trend-card.selected::after { transform:scaleY(1); }
+  .trend-card.selected { border-color:var(--accent); background:rgba(232,98,42,.07); }
+  .trend-rank { font-family:var(--mono); font-size:10px; color:var(--textMut); margin-bottom:7px; letter-spacing:1px; }
+  .trend-topic { font-family:var(--serif); font-size:16px; font-weight:700; margin-bottom:10px; line-height:1.35; color:var(--text); }
+  .trend-meta { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  .trend-tag {
+    font-size:10px; background:rgba(255,255,255,.04); color:var(--textSub);
+    padding:2px 8px; border-radius:20px; font-family:var(--mono); border:1px solid var(--border);
+  }
+  .trend-heat { font-size:11px; color:var(--accent); font-weight:600; margin-left:auto; }
+
+  /* SUBSTACK GRID */
+  .substack-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+  .substack-post {
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:18px 20px; cursor:pointer; transition:all .18s; position:relative; overflow:hidden;
+  }
+  .substack-post::after {
+    content:''; position:absolute; top:0;left:0; width:3px;height:100%;
+    background:var(--green); transform:scaleY(0); transition:transform .18s; transform-origin:bottom; border-radius:3px 0 0 3px;
+  }
+  .substack-post:hover { background:var(--cardHov); border-color:var(--borderHi); transform:translateY(-2px); }
+  .substack-post:hover::after, .substack-post.selected::after { transform:scaleY(1); }
+  .substack-post.selected { border-color:var(--green); background:rgba(46,204,113,.06); }
+  .sp-niche {
+    display:inline-block; font-family:var(--mono); font-size:9px; letter-spacing:1.5px; text-transform:uppercase;
+    color:var(--green); background:rgba(46,204,113,.1); border:1px solid var(--greenDim); padding:2px 7px; border-radius:4px; margin-bottom:9px;
+  }
+  .sp-title { font-family:var(--serif); font-size:15px; font-weight:700; line-height:1.4; margin-bottom:8px; color:var(--text); }
+  .sp-author { font-size:12px; color:var(--textSub); margin-bottom:10px; }
+  .sp-stats { display:flex; gap:14px; font-size:11px; color:var(--textMut); font-family:var(--mono); }
+
+  /* GENERATOR */
+  .generator-wrap {
+    background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:40px;
+    position:relative; overflow:hidden;
+  }
+  .generator-wrap::before {
+    content:''; position:absolute; top:-80px;right:-80px; width:260px;height:260px;
+    background:radial-gradient(circle, rgba(232,98,42,.1) 0%, transparent 70%); pointer-events:none;
+  }
+
+  /* INPUTS */
+  .input-row { display:flex; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+  .input-group { flex:1; min-width:200px; }
+  .input-group label {
+    display:block; font-family:var(--mono); font-size:10px; letter-spacing:1.5px; text-transform:uppercase;
+    color:var(--textSub); margin-bottom:7px;
+  }
+  .input-group input,
+  .input-group select,
+  .input-group textarea {
+    width:100%; background:var(--bg); border:1px solid var(--border); border-radius:9px;
+    padding:11px 14px; color:var(--text); font-family:var(--sans); font-size:14px; outline:none;
+    transition:border-color .2s, box-shadow .2s; appearance:none;
+  }
+  .input-group input:focus,
+  .input-group select:focus,
+  .input-group textarea:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(232,98,42,.12); }
+  .input-group textarea { resize:vertical; min-height:82px; }
+  .input-group select option { background:#1a1a22; }
+
+  .model-info {
+    background:var(--bg); border:1px solid var(--border); border-radius:9px;
+    padding:10px 14px; font-size:11px; color:var(--textSub); font-family:var(--mono); line-height:1.9;
+    height:100%; display:flex; flex-direction:column; justify-content:center;
+  }
+  .model-info span { color:var(--accent); }
+
+  /* PERSONAL ADDON */
+  .personal-addon {
+    background:var(--bg); border:1px solid var(--border); border-radius:12px;
+    padding:16px 20px; margin-bottom:16px; transition:border-color .2s;
+  }
+  .personal-addon.active { border-color:var(--purple); }
+  .addon-toggle { display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none; }
+  .addon-toggle input[type="checkbox"] { width:16px;height:16px; accent-color:var(--purple); cursor:pointer; }
+  .addon-toggle .lbl { font-size:14px; color:var(--textSub); font-weight:500; }
+  .addon-toggle .lbl b { color:var(--purple); font-weight:600; }
+  .addon-fields { margin-top:14px; display:none; }
+  .addon-fields.open { display:block; }
+
+  /* SEL BAR */
+  .sel-bar {
+    background:rgba(232,98,42,.07); border:1px solid var(--accentDim); border-radius:9px;
+    padding:10px 14px; margin-bottom:14px; font-size:12px; color:var(--textSub); display:none; line-height:1.7;
+  }
+  .sel-bar.on { display:block; }
+  .sel-bar strong { color:var(--accent); }
+
+  /* GEN BUTTON */
+  .gen-btn {
+    width:100%; background:var(--accent); color:#fff; border:none;
+    padding:15px 36px; border-radius:10px; font-family:var(--sans); font-size:16px; font-weight:600;
+    cursor:pointer; transition:all .2s; display:inline-flex; align-items:center; justify-content:center;
+    gap:10px; letter-spacing:-.2px; position:relative; overflow:hidden;
+  }
+  .gen-btn::before {
+    content:''; position:absolute;inset:0;
+    background:linear-gradient(135deg,rgba(255,255,255,.12) 0%,transparent 60%);
+  }
+  .gen-btn:hover { background:#c94f20; transform:translateY(-1px); box-shadow:0 8px 24px rgba(232,98,42,.3); }
+  .gen-btn:disabled { background:#2a2a2a; color:#555; cursor:not-allowed; transform:none; box-shadow:none; }
+
+  /* LOADING */
+  .loading-bar { width:100%;height:2px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:14px;display:none; }
+  .loading-bar.on { display:block; }
+  .loading-fill {
+    height:100%; background:linear-gradient(90deg,var(--accent),#ff9d5c,var(--accent));
+    background-size:200%; animation:shimmer 1.4s infinite;
+  }
+  @keyframes shimmer { 0%{background-position:0%} 100%{background-position:200%} }
+  .loading-msg { text-align:center;color:var(--textMut);font-size:12px;margin-top:10px;display:none;font-family:var(--mono);letter-spacing:.5px; }
+  .loading-msg.on { display:block; }
+
+  /* RESULTS */
+  .results { margin-top:36px; }
+  .idea-list { display:flex; flex-direction:column; gap:16px; }
+  .idea-card { background:var(--bg); border:1px solid var(--border); border-radius:14px; overflow:hidden; transition:border-color .2s; }
+  .idea-card:hover { border-color:var(--borderHi); }
+  .idea-header { padding:20px 22px; display:flex; align-items:flex-start; gap:14px; cursor:pointer; }
+  .idea-num {
+    font-family:var(--mono); font-size:11px; font-weight:600;
+    background:var(--accent); color:#fff; width:26px;height:26px; border-radius:50%;
+    display:flex;align-items:center;justify-content:center; flex-shrink:0; margin-top:2px;
+  }
+  .idea-meta { flex:1; }
+  .idea-title { font-family:var(--serif); font-size:18px; font-weight:700; color:var(--text); margin-bottom:6px; line-height:1.3; }
+  .idea-hookp { font-size:13px; color:var(--textSub); line-height:1.55; }
+  .viral-row { display:flex; align-items:center; gap:10px; margin-top:10px; }
+  .score-track { flex:1; height:3px; background:var(--border); border-radius:3px; overflow:hidden; }
+  .score-fill { height:100%; background:linear-gradient(90deg,var(--accent),#ffb347); border-radius:3px; }
+  .score-lbl { font-family:var(--mono); font-size:10px; color:#ffb347; white-space:nowrap; letter-spacing:.5px; }
+  .xbtn {
+    background:var(--card); border:1px solid var(--border); color:var(--textSub);
+    width:30px;height:30px; border-radius:50%; cursor:pointer;
+    display:flex;align-items:center;justify-content:center; font-size:17px; flex-shrink:0; transition:all .2s;
+  }
+  .xbtn:hover { background:var(--cardHov); color:var(--text); border-color:var(--borderHi); }
+  .idea-body { display:none; padding:0 22px 22px; border-top:1px solid var(--border); }
+  .idea-body.open { display:block; }
+  .isec { margin-top:18px; }
+  .isec-title {
+    font-family:var(--mono); font-size:9px; letter-spacing:2px; text-transform:uppercase;
+    color:var(--accent); margin-bottom:10px; display:flex; align-items:center; gap:8px;
+  }
+  .isec-title::after { content:''; flex:1; height:1px; background:var(--border); }
+  .isec-text { font-size:14px; color:#c8c8d8; line-height:1.8; white-space:pre-wrap; }
+  .struct-blocks { display:flex; flex-direction:column; gap:7px; }
+  .struct-block {
+    background:var(--card); border-left:3px solid var(--accent); padding:10px 14px;
+    border-radius:0 8px 8px 0; font-size:13px; color:#c0c0d0; line-height:1.6;
+  }
+  .struct-block strong { color:var(--text); font-size:11px; font-family:var(--mono); letter-spacing:.5px; display:block; margin-bottom:2px; }
+  .img-tags { display:flex; flex-wrap:wrap; gap:7px; }
+  .img-tag { background:var(--card); border:1px solid var(--border); border-radius:7px; padding:6px 12px; font-size:12px; color:var(--textSub); display:flex;align-items:center;gap:5px; }
+  .copy-btn {
+    background:var(--card); border:1px solid var(--border); color:var(--textSub);
+    padding:7px 14px; border-radius:7px; font-size:11px; cursor:pointer; transition:all .18s;
+    font-family:var(--mono); display:inline-flex;align-items:center;gap:5px; margin-top:10px; letter-spacing:.3px;
+  }
+  .copy-btn:hover { background:var(--cardHov); border-color:var(--borderHi); color:var(--text); }
+  .copy-btn.ok { background:rgba(46,204,113,.12); border-color:var(--greenDim); color:var(--green); }
+
+  /* EMPTY */
+  .empty { text-align:center; padding:56px 20px; color:var(--textMut); }
+  .empty .icon { font-size:44px; margin-bottom:14px; }
+  .empty p { font-size:14px; line-height:1.7; }
+
+  /* FOOTER */
+  footer {
+    background:var(--surface); border-top:1px solid var(--border);
+    color:var(--textMut); text-align:center; padding:22px;
+    font-size:11px; font-family:var(--mono); letter-spacing:.5px;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width:5px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+  ::-webkit-scrollbar-thumb:hover { background:var(--borderHi); }
+
+  /* RESPONSIVE */
+  @media (max-width:768px) {
+    header { padding:14px 18px; }
+    .hero { padding:48px 18px 40px; }
+    .main { padding:28px 16px 70px; }
+    .generator-wrap { padding:24px 18px; }
+    .input-row { flex-direction:column; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Sub<span>Stack</span> Viral</div>
+  <div class="header-right">
+    <div class="dot"></div>
+    <div class="header-tag">AI · Free · Live</div>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <h1>Substack-এ <em>Viral</em> হও<br/>AI দিয়ে</h1>
+  <p>Real-time trending topics দেখো, top posts থেকে inspiration নাও, আর AI দিয়ে তৈরি করো 5টি viral post idea — পূর্ণ script ও structure সহ।</p>
+  <div class="hero-pills">
+    <div class="hero-pill">🔥 Dynamic Trending</div>
+    <div class="hero-pill">📈 Viral Post Analysis</div>
+    <div class="hero-pill">🤖 AI Generator</div>
+    <div class="hero-pill">💸 100% Free</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- TRENDING -->
+  <div class="block">
+    <div class="sec-head">
+      <div class="sec-title">🔥 Trending Topics এখন <span class="chip chip-live">Live</span></div>
+      <div class="sec-sub">তোমার niche লেখো — AI সাথে সাথে trending topics fetch করবে। ক্লিক করে select করো।</div>
+    </div>
+    <div class="trend-search">
+      <input class="trend-input" type="text" id="trendNicheInput"
+        placeholder="Niche লেখো (যেমন: AI, Personal Finance, Mental Health...)"
+        onkeydown="if(event.key==='Enter') fetchTrending()" />
+      <button class="trend-fetch-btn" id="trendBtn" onclick="fetchTrending()">🔍 Trending আনো</button>
+    </div>
+    <div class="trending-grid" id="trendingGrid">
+      <div class="skel-card"><div class="skeleton" style="height:10px;width:40%;margin-bottom:10px;"></div><div class="skeleton" style="height:14px;width:70%;margin-bottom:12px;"></div><div style="display:flex;gap:6px;"><div class="skeleton" style="width:52px;height:20px;border-radius:20px;"></div><div class="skeleton" style="width:40px;height:20px;border-radius:20px;"></div></div></div>
+      <div class="skel-card"><div class="skeleton" style="height:10px;width:35%;margin-bottom:10px;"></div><div class="skeleton" style="height:14px;width:85%;margin-bottom:12px;"></div><div style="display:flex;gap:6px;"><div class="skeleton" style="width:52px;height:20px;border-radius:20px;"></div></div></div>
+      <div class="skel-card"><div class="skeleton" style="height:10px;width:40%;margin-bottom:10px;"></div><div class="skeleton" style="height:14px;width:60%;margin-bottom:12px;"></div><div style="display:flex;gap:6px;"><div class="skeleton" style="width:52px;height:20px;border-radius:20px;"></div><div class="skeleton" style="width:40px;height:20px;border-radius:20px;"></div></div></div>
+      <div class="skel-card"><div class="skeleton" style="height:10px;width:38%;margin-bottom:10px;"></div><div class="skeleton" style="height:14px;width:90%;margin-bottom:12px;"></div><div style="display:flex;gap:6px;"><div class="skeleton" style="width:52px;height:20px;border-radius:20px;"></div></div></div>
+    </div>
+  </div>
+
+  <!-- VIRAL SUBSTACK POSTS -->
+  <div class="block">
+    <div class="sec-head">
+      <div class="sec-title">📈 Substack-এ এখন Viral <span class="chip chip-g">Top Posts</span></div>
+      <div class="sec-sub">তোমার niche অনুযায়ী AI viral Substack posts আনবে — inspiration নাও, select করো।</div>
+    </div>
+    <div class="substack-grid" id="substackGrid">
+      <div class="skel-card"><div class="skeleton" style="width:60px;height:18px;border-radius:4px;margin-bottom:10px;"></div><div class="skeleton" style="height:13px;width:90%;margin-bottom:6px;"></div><div class="skeleton" style="height:13px;width:60%;margin-bottom:12px;"></div><div style="display:flex;gap:10px;"><div class="skeleton" style="width:50px;height:11px;border-radius:4px;"></div><div class="skeleton" style="width:40px;height:11px;border-radius:4px;"></div></div></div>
+      <div class="skel-card"><div class="skeleton" style="width:60px;height:18px;border-radius:4px;margin-bottom:10px;"></div><div class="skeleton" style="height:13px;width:95%;margin-bottom:6px;"></div><div class="skeleton" style="height:13px;width:40%;margin-bottom:12px;"></div><div style="display:flex;gap:10px;"><div class="skeleton" style="width:50px;height:11px;border-radius:4px;"></div></div></div>
+      <div class="skel-card"><div class="skeleton" style="width:60px;height:18px;border-radius:4px;margin-bottom:10px;"></div><div class="skeleton" style="height:13px;width:70%;margin-bottom:6px;"></div><div class="skeleton" style="height:13px;width:80%;margin-bottom:12px;"></div><div style="display:flex;gap:10px;"><div class="skeleton" style="width:50px;height:11px;border-radius:4px;"></div><div class="skeleton" style="width:40px;height:11px;border-radius:4px;"></div></div></div>
+    </div>
+  </div>
+
+  <!-- GENERATOR -->
+  <div class="generator-wrap">
+    <div class="sec-head">
+      <div class="sec-title" style="color:var(--text);">✍️ Viral Post Generator <span class="chip chip-p">AI Powered</span></div>
+      <div class="sec-sub">তোমার details দাও — AI দেবে 5টি ready-to-publish post idea, পূর্ণ script সহ।</div>
+    </div>
+
+    <div class="input-row">
+      <div class="input-group">
+        <label>তোমার Substack Niche</label>
+        <input type="text" id="nicheInput" placeholder="যেমন: Personal Finance, AI Tools, Mental Health..." />
+      </div>
+      <div class="input-group">
+        <label>Target Audience</label>
+        <input type="text" id="audienceInput" placeholder="যেমন: Bangladeshi professionals, Students..." />
+      </div>
+    </div>
+
+    <div class="input-row">
+      <div class="input-group">
+        <label>Post Language</label>
+        <select id="langSelect">
+          <option value="Bengali">বাংলা (Bengali)</option>
+          <option value="English">English</option>
+          <option value="Banglish">Banglish (Mix)</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label>Tone / Style</label>
+        <select id="toneSelect">
+          <option value="storytelling">Storytelling / Personal</option>
+          <option value="educational">Educational / How-to</option>
+          <option value="controversial">Bold / Controversial Take</option>
+          <option value="data-driven">Data-driven / Research</option>
+          <option value="listicle">Listicle / Quick Tips</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="input-row">
+      <div class="input-group" style="flex:2;">
+        <label>🤖 AI Model</label>
+        <select id="modelSelect" onchange="updateModelInfo()">
+          <option value="mistralai/mistral-7b-instruct:free">⚡ Mistral 7B — Fast &amp; Free</option>
+          <option value="google/gemma-3-27b-it:free">🌟 Google Gemma 3 27B — High Quality</option>
+          <option value="meta-llama/llama-3.2-3b-instruct:free">🦙 Llama 3.2 3B — Very Fast</option>
+          <option value="deepseek/deepseek-r1-distill-llama-70b:free">🧠 DeepSeek R1 70B — Best Quality (Slow)</option>
+          <option value="microsoft/phi-3-mini-128k-instruct:free">🔷 Microsoft Phi-3 Mini</option>
+          <option value="qwen/qwen-2-7b-instruct:free">🌀 Qwen 2 7B — Best Bengali ⭐</option>
+        </select>
+      </div>
+      <div class="input-group" style="flex:1; display:flex; align-items:flex-end;">
+        <div class="model-info" id="modelInfoBox">
+          ⚡ Speed: <span>Fast</span><br/>
+          🔤 Bengali: <span>Good</span><br/>
+          💰 Cost: <span>Free</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="personal-addon" id="personalAddon">
+      <label class="addon-toggle">
+        <input type="checkbox" id="personalToggle" onchange="toggleAddon()" />
+        <span class="lbl">🎯 নিজে কিছু যোগ করতে চাই — <b>Personal Command</b></span>
+      </label>
+      <div class="addon-fields" id="addonFields">
+        <div class="input-group" style="margin-top:12px;">
+          <label>তোমার Personal Instruction / Context</label>
+          <textarea id="personalInput" placeholder="যেমন: আমার startup failure story দিয়ে hook বানাতে চাই। অথবা: controversial angle চাই যেন comment section জ্বলে উঠুক..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="sel-bar" id="selBar">
+      <strong>✅ Selected as Inspiration:</strong> <span id="selList"></span>
+    </div>
+
+    <button class="gen-btn" id="genBtn" onclick="generateIdeas()">
+      <span>🚀</span> 5টি Viral Post Idea তৈরি করো
+    </button>
+    <div class="loading-bar" id="loadingBar"><div class="loading-fill"></div></div>
+    <div class="loading-msg" id="loadingMsg">AI চিন্তা করছে...</div>
+
+    <div class="results" id="results">
+      <div class="empty" id="emptyState">
+        <div class="icon">✨</div>
+        <p>উপরে niche দিয়ে Trending আনো,<br/>তারপর "Viral Post Idea তৈরি করো" বাটনে ক্লিক করো।</p>
+      </div>
+      <div id="ideaList" class="idea-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<footer>SubStack Viral Generator · Powered by OpenRouter (Free) · Deploy on Netlify</footer>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────
+// API key এখন Netlify backend এ আছে — frontend এ দরকার নেই।
+
+// ── MODEL META ────────────────────────────────────────────
+const modelMeta = {
+  "mistralai/mistral-7b-instruct:free":         { speed:"Fast",      bengali:"Good",        cost:"Free" },
+  "google/gemma-3-27b-it:free":                 { speed:"Medium",    bengali:"Very Good",   cost:"Free" },
+  "meta-llama/llama-3.2-3b-instruct:free":      { speed:"Very Fast", bengali:"Basic",       cost:"Free" },
+  "deepseek/deepseek-r1-distill-llama-70b:free":{ speed:"Slow",      bengali:"Excellent",   cost:"Free" },
+  "microsoft/phi-3-mini-128k-instruct:free":    { speed:"Fast",      bengali:"Basic",       cost:"Free" },
+  "qwen/qwen-2-7b-instruct:free":               { speed:"Fast",      bengali:"Best ⭐",     cost:"Free" },
+};
+function updateModelInfo() {
+  const m = modelMeta[document.getElementById('modelSelect').value] || {};
+  document.getElementById('modelInfoBox').innerHTML =
+    `⚡ Speed: <span>${m.speed||'?'}</span><br/>🔤 Bengali: <span>${m.bengali||'?'}</span><br/>💰 Cost: <span>${m.cost||'Free'}</span>`;
+}
+
+// ── SELECTED TOPICS ───────────────────────────────────────
+let selectedTopics = [];
+function toggleSel(id, text) {
+  const el = document.getElementById(id);
+  const idx = selectedTopics.indexOf(text);
+  if (idx === -1) { selectedTopics.push(text); el.classList.add('selected'); }
+  else { selectedTopics.splice(idx, 1); el.classList.remove('selected'); }
+  const bar = document.getElementById('selBar');
+  if (selectedTopics.length > 0) { bar.classList.add('on'); document.getElementById('selList').textContent = selectedTopics.join(' · '); }
+  else bar.classList.remove('on');
+}
+
+// ── AI CALL HELPER ────────────────────────────────────────
+// এখন সরাসরি OpenRouter নয়, আমাদের Netlify backend function call হচ্ছে।
+// API key টি সার্ভারে নিরাপদে থাকে — frontend এ কখনো expose হয় না।
+async function aiCall(prompt, maxTokens = 1400) {
+  const model = document.getElementById('modelSelect').value;
+  const res = await fetch("/.netlify/functions/ai", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model,
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: maxTokens,
+      temperature: 0.75
+    })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || 'API error');
+  return (data.choices?.[0]?.message?.content || '').replace(/```json/g,'').replace(/```/g,'').trim();
+}
+
+// ── FETCH TRENDING ────────────────────────────────────────
+async function fetchTrending() {
+  const niche = document.getElementById('trendNicheInput').value.trim() || 'general content creation';
+  const btn = document.getElementById('trendBtn');
+  btn.disabled = true; btn.textContent = '⏳ Loading...';
+  showSkeleton();
+
+  const prompt = `You are a content research expert. Generate trending topics AND viral Substack post examples for the niche: "${niche}" in 2025-2026.
+
+Return ONLY valid JSON (no markdown, no explanation):
+{
+  "trending": [
+    {"rank":1,"topic":"specific trending topic title","tags":["keyword1","keyword2"],"heat":"🔥🔥🔥 Viral"},
+    {"rank":2,...},
+    ... 10 items total
+  ],
+  "substackPosts": [
+    {"author":"Newsletter Name","niche":"short label","title":"Compelling viral post title","reads":"1.2M","comments":"3.4K"},
+    ... 6 items total
+  ]
+}
+
+Heat values must be one of: "🔥 Building", "🔥🔥 Rising", "🔥🔥🔥 Hot", "🔥🔥🔥 Viral"
+Topics must be specific, current, and relevant to "${niche}".`;
+
+  try {
+    const raw = await aiCall(prompt, 1400);
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('No JSON found');
+    const parsed = JSON.parse(match[0]);
+    renderTrending(parsed.trending || []);
+    renderSubstack(parsed.substackPosts || []);
+    if (!document.getElementById('nicheInput').value)
+      document.getElementById('nicheInput').value = niche;
+  } catch(e) {
+    document.getElementById('trendingGrid').innerHTML =
+      `<div style="grid-column:1/-1;padding:24px;background:var(--card);border:1px solid var(--border);border-radius:12px;color:var(--accent);font-size:13px;">
+        ⚠️ Trending fetch করতে সমস্যা হয়েছে।<br/><span style="color:var(--textMut);font-size:11px;font-family:var(--mono);">${e.message}</span><br/><br/>
+        <span style="color:var(--textSub);font-size:12px;">API key সঠিক কিনা দেখো এবং আবার চেষ্টা করো।</span>
+      </div>`;
+    document.getElementById('substackGrid').innerHTML = '';
+  }
+  btn.disabled = false; btn.textContent = '🔍 Trending আনো';
+}
+
+function showSkeleton() {
+  const skCard = () => `<div class="skel-card">
+    <div class="skeleton" style="height:10px;width:38%;margin-bottom:10px;"></div>
+    <div class="skeleton" style="height:14px;width:72%;margin-bottom:12px;"></div>
+    <div style="display:flex;gap:6px;">
+      <div class="skeleton" style="width:52px;height:20px;border-radius:20px;"></div>
+      <div class="skeleton" style="width:40px;height:20px;border-radius:20px;"></div>
+    </div></div>`;
+  document.getElementById('trendingGrid').innerHTML = Array(6).fill(0).map(skCard).join('');
+  const skPost = () => `<div class="skel-card">
+    <div class="skeleton" style="width:60px;height:18px;border-radius:4px;margin-bottom:10px;"></div>
+    <div class="skeleton" style="height:13px;width:88%;margin-bottom:6px;"></div>
+    <div class="skeleton" style="height:13px;width:55%;margin-bottom:12px;"></div>
+    <div style="display:flex;gap:10px;">
+      <div class="skeleton" style="width:50px;height:11px;border-radius:4px;"></div>
+      <div class="skeleton" style="width:40px;height:11px;border-radius:4px;"></div>
+    </div></div>`;
+  document.getElementById('substackGrid').innerHTML = Array(4).fill(0).map(skPost).join('');
+}
+
+function renderTrending(items) {
+  document.getElementById('trendingGrid').innerHTML = items.map((t,i) => `
+    <div class="trend-card" id="tr-${i}" onclick="toggleSel('tr-${i}','${esc(t.topic)}')">
+      <div class="trend-rank">#${t.rank} TRENDING</div>
+      <div class="trend-topic">${t.topic}</div>
+      <div class="trend-meta">
+        ${(t.tags||[]).map(g=>`<span class="trend-tag">${g}</span>`).join('')}
+        <span class="trend-heat">${t.heat}</span>
+      </div>
+    </div>`).join('');
+}
+
+function renderSubstack(items) {
+  document.getElementById('substackGrid').innerHTML = items.map((p,i) => `
+    <div class="substack-post" id="sp-${i}" onclick="toggleSel('sp-${i}','${esc(p.title)}')">
+      <div class="sp-niche">${p.niche}</div>
+      <div class="sp-title">${p.title}</div>
+      <div class="sp-author">✍️ ${p.author}</div>
+      <div class="sp-stats"><span>👁️ ${p.reads}</span><span>💬 ${p.comments}</span></div>
+    </div>`).join('');
+}
+
+// ── ADDON TOGGLE ─────────────────────────────────────────
+function toggleAddon() {
+  const checked = document.getElementById('personalToggle').checked;
+  document.getElementById('addonFields').classList.toggle('open', checked);
+  document.getElementById('personalAddon').classList.toggle('active', checked);
+}
+
+// ── GENERATE IDEAS ────────────────────────────────────────
+async function generateIdeas() {
+  const niche    = document.getElementById('nicheInput').value.trim();
+  const audience = document.getElementById('audienceInput').value.trim();
+  const lang     = document.getElementById('langSelect').value;
+  const tone     = document.getElementById('toneSelect').value;
+  const personal = document.getElementById('personalInput').value.trim();
+
+  if (!niche) { alert('অনুগ্রহ করে তোমার Substack Niche লেখো!'); return; }
+
+  const btn = document.getElementById('genBtn');
+  document.getElementById('ideaList').innerHTML = '';
+  document.getElementById('emptyState').style.display = 'none';
+  btn.disabled = true; btn.innerHTML = '<span>⏳</span> তৈরি হচ্ছে...';
+  document.getElementById('loadingBar').classList.add('on');
+  document.getElementById('loadingMsg').classList.add('on');
+
+  const msgs = ["Trending data বিশ্লেষণ হচ্ছে...","Viral hooks তৈরি হচ্ছে...","Post structure সাজানো হচ্ছে...","Script লেখা হচ্ছে...","Almost done..."];
+  let mi = 0;
+  const iv = setInterval(() => { document.getElementById('loadingMsg').textContent = msgs[++mi % msgs.length]; }, 2200);
+
+  const topCtx = selectedTopics.length > 0 ? `Use these trending topics as inspiration: ${selectedTopics.join(', ')}.` : '';
+  const perCtx = personal ? `Creator personal note: ${personal}` : '';
+
+  const prompt = `You are an expert Substack growth strategist. Generate exactly 5 viral Substack post ideas.
+
+NICHE: ${niche}
+AUDIENCE: ${audience || 'General readers'}
+LANGUAGE: ${lang}
+TONE: ${tone}
+${topCtx}
+${perCtx}
+
+Return ONLY a JSON array, no markdown, no explanation. All content must be in ${lang}.
+[
+  {
+    "title": "compelling click-worthy headline",
+    "hook": "first 2-3 sentences that grab attention instantly",
+    "structure": [{"section":"Section Name","content":"what goes here"}],
+    "images": ["specific image description 1","specific image 2","specific image 3"],
+    "script": "detailed paragraph-by-paragraph writing guide",
+    "viralScore": 85,
+    "whyViral": "2-3 clear reasons why this will go viral"
+  }
+]`;
+
+  try {
+    const raw = await aiCall(prompt, 3400);
+    clearInterval(iv);
+    let ideas;
+    try { ideas = JSON.parse(raw); }
+    catch { const m = raw.match(/\[[\s\S]*\]/); if(m) ideas = JSON.parse(m[0]); else throw new Error('JSON parse failed'); }
+    renderIdeas(ideas);
+  } catch(err) {
+    clearInterval(iv);
+    document.getElementById('ideaList').innerHTML = `
+      <div style="background:rgba(200,50,50,.07);border:1px solid rgba(200,50,50,.25);border-radius:12px;padding:24px;text-align:center;">
+        <div style="font-size:26px;margin-bottom:10px;">⚠️</div>
+        <div style="font-weight:600;margin-bottom:6px;color:#f87171;">কিছু একটা সমস্যা হয়েছে</div>
+        <div style="font-size:12px;color:var(--textMut);">${err.message}<br/><br/>API key সঠিক কিনা, credits আছে কিনা, আর internet connection চেক করো।</div>
+      </div>`;
+  }
+  btn.disabled = false; btn.innerHTML = '<span>🚀</span> 5টি Viral Post Idea তৈরি করো';
+  document.getElementById('loadingBar').classList.remove('on');
+  document.getElementById('loadingMsg').classList.remove('on');
+}
+
+function renderIdeas(ideas) {
+  if (!Array.isArray(ideas) || !ideas.length) {
+    document.getElementById('ideaList').innerHTML = '<div style="color:var(--textMut);text-align:center;padding:40px;">কোনো idea পাওয়া যায়নি। আবার চেষ্টা করো।</div>';
+    return;
+  }
+  document.getElementById('ideaList').innerHTML = ideas.map((idea, i) => {
+    const score = idea.viralScore || Math.floor(70 + Math.random()*25);
+    const structHTML = Array.isArray(idea.structure)
+      ? idea.structure.map(s=>`<div class="struct-block"><strong>${s.section||''}</strong>${s.content||''}</div>`).join('')
+      : `<div class="struct-block">${idea.structure||''}</div>`;
+    const imgHTML = Array.isArray(idea.images)
+      ? idea.images.map(img=>`<div class="img-tag">🖼️ ${img}</div>`).join('')
+      : `<div class="img-tag">🖼️ ${idea.images||''}</div>`;
+    return `
+      <div class="idea-card">
+        <div class="idea-header" onclick="toggleIdea(${i})">
+          <div class="idea-num">${i+1}</div>
+          <div class="idea-meta">
+            <div class="idea-title">${idea.title||'Untitled'}</div>
+            <div class="idea-hookp">${(idea.hook||'').substring(0,130)}${(idea.hook||'').length>130?'...':''}</div>
+            <div class="viral-row">
+              <div class="score-track"><div class="score-fill" style="width:${score}%"></div></div>
+              <div class="score-lbl">🔥 ${score}/100 Viral Score</div>
+            </div>
+          </div>
+          <button class="xbtn" id="xbtn-${i}">＋</button>
+        </div>
+        <div class="idea-body" id="ibody-${i}">
+          <div class="isec">
+            <div class="isec-title">Full Hook / Opening</div>
+            <div class="isec-text">${idea.hook||''}</div>
+            <button class="copy-btn" onclick="doCopy('${escAttr(idea.hook||'')}',this)">📋 Copy Hook</button>
+          </div>
+          <div class="isec">
+            <div class="isec-title">Post Structure</div>
+            <div class="struct-blocks">${structHTML}</div>
+          </div>
+          <div class="isec">
+            <div class="isec-title">Image Suggestions</div>
+            <div class="img-tags">${imgHTML}</div>
+          </div>
+          <div class="isec">
+            <div class="isec-title">Full Script / Writing Guide</div>
+            <div class="isec-text">${idea.script||''}</div>
+            <button class="copy-btn" onclick="doCopy('${escAttr(idea.script||'')}',this)">📋 Copy Script</button>
+          </div>
+          <div class="isec">
+            <div class="isec-title">কেন Viral হবে</div>
+            <div class="isec-text">${idea.whyViral||''}</div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function toggleIdea(i) {
+  const b = document.getElementById(`ibody-${i}`);
+  const btn = document.getElementById(`xbtn-${i}`);
+  const open = b.classList.toggle('open');
+  btn.textContent = open ? '－' : '＋';
+}
+
+function esc(s){ return (s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+function escAttr(s){ return (s||'').replace(/'/g,"\\'").replace(/\n/g,'\\n').replace(/"/g,'\\"'); }
+
+function doCopy(text, btn) {
+  navigator.clipboard.writeText(text.replace(/\\n/g,'\n').replace(/\\'/g,"'").replace(/\\"/g,'"')).then(()=>{
+    btn.textContent='✅ Copied!'; btn.classList.add('ok');
+    setTimeout(()=>{ btn.textContent='📋 Copy'; btn.classList.remove('ok'); }, 2000);
+  });
+}
+
+// ── AUTO-LOAD ─────────────────────────────────────────────
+// Backend ready থাকলে auto-load করে (key এখন server এ আছে)
+window.addEventListener('load', () => {
+  document.getElementById('trendNicheInput').value = 'Productivity & Self-improvement';
+  fetchTrending();
+});
+</script>
+</body>
+</html>

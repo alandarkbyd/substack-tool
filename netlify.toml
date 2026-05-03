@@ -2,7 +2,9 @@
   publish = "."
   functions = "netlify/functions"
 
-# /.netlify/functions/* এ সরাসরি access দেওয়া হচ্ছে
+[functions]
+  node_bundler = "esbuild"
+
 [[headers]]
   for = "/.netlify/functions/*"
   [headers.values]
